@@ -27,3 +27,15 @@
 *.i*86
 *.x86_64
 *.hex
+
+#project files
+*.workspace
+*.project
+.clang
+.codelite
+
+#other
+fs
+fs.pre-c
+DC612-formatstring-notes
+.DS_*
