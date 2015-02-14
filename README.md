@@ -1,4 +1,4 @@
-DC612-private
+DC612
 =============
 
 Collection of things from our DC612 talks.
