@@ -1,0 +1,7 @@
+[package]
+name = "crackme"
+version = "0.1.0"
+authors = ["Spenser Reinhardt <>"]
+
+[dependencies]
+md5 = "*"

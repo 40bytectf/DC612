@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <title>Intro to Rust: Writing a crackme</title>
+
+    
+    <link rel="stylesheet" href="presentation/css/rust.css">
+<link rel="stylesheet" href="presentation/css/sliderust.css">
+<script src="presentation/js/sliderust.js"></script>
+
+
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+    <h1 class="title">Intro to Rust: Writing a crackme</h1>
+    <p>Spenser Reinhardt</p>
+
+<p>DC612 - July 9, 2015</p>
+
+<h1 id="what-is-rust" class='section-header'><a
+                           href="#what-is-rust">What is Rust</a></h1>
+<p>Rust is a fairly new systems programming language focused on safety and speed.</p>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Hello, world!&quot;</span>);
+}
+</pre>
+
+<pre><code class="language-norust">&gt; Hello, world!
+</code></pre>
+
+<h1 id="history" class='section-header'><a
+                           href="#history">History</a></h1>
+<ul>
+<li>Started as a personal project in 2006 by Graydon Hoare</li>
+<li>First compiler written in OCaml</li>
+<li>Mozilla took over the project 3 years later</li>
+<li>Compiler rewritten in Rust itself in 2010</li>
+</ul>
+
+<h1 id="variable-creation-and-assignment" class='section-header'><a
+                           href="#variable-creation-and-assignment">Variable Creation and Assignment</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>var</span> <span class='op'>=</span> <span class='string'>&quot;abc&quot;</span>;
+<span class='ident'>var</span>.<span class='ident'>push</span>(<span class='string'>&quot;def&quot;</span>);
+</pre>
+
+<h1 id="conditional-statements" class='section-header'><a
+                           href="#conditional-statements">Conditional Statements</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>if</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='number'>1</span> {
+    <span class='ident'>do_something</span>();
+} <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>val</span> <span class='op'>=</span> <span class='ident'>b</span> {
+    <span class='ident'>do_something_else</span>();
+} <span class='kw'>else</span> {
+    <span class='ident'>do_nothing</span>();
+}
+</pre>
+
+<h1 id="match-statements" class='section-header'><a
+                           href="#match-statements">Match Statements</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>match</span> <span class='ident'>val</span> {
+    <span class='number'>1</span> <span class='op'>=&gt;</span> <span class='ident'>do_something</span>(),
+    <span class='ident'>a</span> <span class='op'>=&gt;</span> <span class='ident'>do_something_else</span>(),
+    _ <span class='op'>=&gt;</span> <span class='ident'>do_nothing</span>(),
+};
+</pre>
+
+<h1 id="option-types" class='section-header'><a
+                           href="#option-types">Option Types</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>T</span><span class='op'>&gt;</span> {
+    <span class='prelude-val'>Some</span>(<span class='ident'>val</span>) <span class='op'>=&gt;</span> <span class='ident'>val</span>,
+    <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='ident'>default</span>,
+};
+</pre>
+
+<h1 id="result-types" class='section-header'><a
+                           href="#result-types">Result Types</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>let</span> <span class='ident'>var</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>T</span>,<span class='ident'>E</span><span class='op'>&gt;</span> {
+    <span class='prelude-val'>Ok</span>(<span class='ident'>t</span>) <span class='op'>=&gt;</span> <span class='ident'>t</span>,
+    <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> <span class='ident'>e</span>,
+};
+</pre>
+
+<h1 id="function-declarations" class='section-header'><a
+                           href="#function-declarations">Function Declarations</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>fn</span> <span class='ident'>test</span>(<span class='ident'>a</span>,<span class='ident'>b</span>) {
+    <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>&lt;</span> <span class='ident'>b</span> {
+        <span class='kw'>return</span> <span class='ident'>a</span>;
+    }
+    <span class='ident'>a</span> <span class='op'>+</span> <span class='ident'>b</span>
+}
+</pre>
+
+<h1 id="crackme-objectives" class='section-header'><a
+                           href="#crackme-objectives">Crackme Objectives</a></h1>
+<ul>
+<li>Reverse engineering challenge</li>
+<li>Difficult but not impossible</li>
+<li>Little to no hints in binary</li>
+<li>Relative to audiance interests</li>
+</ul>
+
+<h1 id="main.rs" class='section-header'><a
+                           href="#main.rs">main.rs</a></h1><pre class='rust rust-example-rendered'>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>slice_patterns</span>, <span class='ident'>convert</span>, <span class='ident'>vec_push_all</span>)]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>md5</span>;
+<span class='kw'>mod</span> <span class='ident'>keys</span>;
+<span class='kw'>use</span> <span class='ident'>keys</span>::<span class='op'>*</span>;
+
+<span class='kw'>fn</span> <span class='ident'>main</span>() {
+
+    <span class='comment'>// capture arguments</span>
+    <span class='kw'>let</span> <span class='ident'>key</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>get_key_from_args</span>() {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>k</span>) <span class='op'>=&gt;</span> <span class='ident'>k</span>,
+        <span class='prelude-val'>Err</span>(<span class='ident'>why</span>) <span class='op'>=&gt;</span> {
+            <span class='ident'>handle_errors</span>(<span class='ident'>why</span>);
+            <span class='kw'>return</span>;
+        },
+    };
+
+    <span class='comment'>// separate key into segments xxxxx-xxxxx-xxxxx</span>
+    <span class='kw'>let</span> <span class='ident'>segments</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>get_key_segments</span>(<span class='ident'>key</span>.<span class='ident'>as_ref</span>()) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+        <span class='prelude-val'>Err</span>(<span class='ident'>why</span>) <span class='op'>=&gt;</span> {
+            <span class='ident'>handle_errors</span>(<span class='ident'>why</span>);
+            <span class='kw'>return</span>;
+        },
+    };
+    <span class='comment'>// check segment1 and create modified key</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>mod_key</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>check_segment1</span>(<span class='ident'>segments</span>.<span class='ident'>as_ref</span>()) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+        <span class='prelude-val'>Err</span>(<span class='ident'>why</span>) <span class='op'>=&gt;</span> {
+            <span class='ident'>handle_errors</span>(<span class='ident'>why</span>);
+            <span class='kw'>return</span>;
+        },
+    };
+
+    <span class='comment'>// check segment 2 and store result in seg</span>
+    <span class='kw'>let</span> _ <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>check_segment2</span>(<span class='ident'>segments</span>.<span class='ident'>as_ref</span>(), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>mod_key</span>) {
+        <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> {},
+        <span class='prelude-val'>Err</span>(<span class='ident'>why</span>) <span class='op'>=&gt;</span> {
+            <span class='ident'>handle_errors</span>(<span class='ident'>why</span>);
+            <span class='kw'>return</span>;
+        },
+    };
+
+    <span class='comment'>// check segment 3</span>
+    <span class='kw'>let</span> _ <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>check_segment3</span>(<span class='ident'>segments</span>.<span class='ident'>as_ref</span>(), <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>mod_key</span>) {
+        <span class='prelude-val'>Ok</span>(_) <span class='op'>=&gt;</span> {},
+        <span class='prelude-val'>Err</span>(<span class='ident'>why</span>) <span class='op'>=&gt;</span> {
+            <span class='ident'>handle_errors</span>(<span class='ident'>why</span>);
+            <span class='kw'>return</span>;
+        },
+    };
+
+    <span class='kw'>if</span> <span class='ident'>check_final</span>(<span class='ident'>mod_key</span>.<span class='ident'>as_ref</span>()) {
+        <span class='ident'>print_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>segments</span>);
+        <span class='ident'>print_key</span>(<span class='kw-2'>&amp;</span><span class='ident'>mod_key</span>);
+    } <span class='kw'>else</span> {
+        <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;You failed to enter the correct key&quot;</span>);
+    }
+
+}
+</pre>
+
+<h1 id="capturing-arguments" class='section-header'><a
+                           href="#capturing-arguments">Capturing Arguments</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_key_from_args</span>() <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>String</span>,<span class='ident'>KeyErr</span><span class='op'>&gt;</span> {
+
+    <span class='kw'>let</span> <span class='ident'>args</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>env</span>::<span class='ident'>args</span>().<span class='ident'>collect</span>();
+
+    <span class='kw'>match</span> <span class='kw-2'>&amp;</span><span class='ident'>args</span>[..] {
+        [<span class='kw-2'>ref</span> <span class='ident'>name</span>] <span class='op'>=&gt;</span> {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Usage: {} figure it out&quot;</span>, <span class='ident'>name</span>);
+            <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>InvalidArgs</span>)
+        },
+        [_, <span class='kw-2'>ref</span> <span class='ident'>string</span>] <span class='op'>=&gt;</span> {
+            <span class='kw'>match</span> <span class='ident'>string</span>.<span class='ident'>parse</span>() {
+                <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>),
+                <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>InputParse</span>),
+            }
+        },
+        _ <span class='op'>=&gt;</span> {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Usage: this shouldnt be happening!&quot;</span>);
+            <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>UnknownError</span>)
+        },
+    }
+</pre>
+
+<h1 id="separating-the-key" class='section-header'><a
+                           href="#separating-the-key">Separating the Key</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_key_segments</span>(<span class='ident'>key</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>) <span class='op'>-&gt;</span> <span class='ident'>KeyRst</span> {
+
+    <span class='comment'>//validate length: 5 char x 3 segments + 2 hyphens = 17</span>
+    <span class='kw'>if</span> <span class='ident'>key</span>.<span class='ident'>len</span>() <span class='op'>!=</span> <span class='ident'>KEYLEN</span> {
+        <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>InvalidLength</span>);
+    }
+
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>segments</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+    <span class='kw'>for</span> <span class='ident'>seg</span> <span class='kw'>in</span> <span class='ident'>key</span>.<span class='ident'>split</span>(<span class='string'>&quot;-&quot;</span>) {
+        <span class='ident'>segments</span>.<span class='ident'>push</span>(<span class='ident'>seg</span>.<span class='ident'>to_string</span>());
+    };
+
+    <span class='prelude-val'>Ok</span>(<span class='ident'>segments</span>)
+}
+</pre>
+
+<h1 id="error-handling" class='section-header'><a
+                           href="#error-handling">Error Handling</a></h1><pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>allow</span>(<span class='ident'>dead_code</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>KeyErr</span> {
+    <span class='ident'>InvalidArgs</span>,
+    <span class='ident'>InputParse</span>,
+    <span class='ident'>InvalidLength</span>,
+    <span class='ident'>InvalidFormat</span>,
+    <span class='ident'>S1Err</span>,
+    <span class='ident'>S2Err</span>,
+    <span class='ident'>S3Err</span>,
+    <span class='ident'>UnknownError</span>,
+}
+
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>handle_errors</span>(<span class='ident'>err</span>: <span class='ident'>KeyErr</span>) {
+
+    <span class='kw'>match</span> <span class='ident'>err</span> {
+        <span class='ident'>KeyErr</span>::<span class='ident'>InvalidArgs</span> <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Improper arguments provided&quot;</span>),
+        <span class='ident'>KeyErr</span>::<span class='ident'>InputParse</span> <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Failed to parse key&quot;</span>),
+        <span class='ident'>KeyErr</span>::<span class='ident'>InvalidLength</span> <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Invalid key length&quot;</span>),
+        <span class='ident'>KeyErr</span>::<span class='ident'>InvalidFormat</span> <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Invalid key format&quot;</span>),
+        <span class='ident'>KeyErr</span>::<span class='ident'>S1Err</span> <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Segment 1 error&quot;</span>),
+        <span class='ident'>KeyErr</span>::<span class='ident'>S2Err</span> <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Segment 2 error&quot;</span>),
+        <span class='ident'>KeyErr</span>::<span class='ident'>S3Err</span> <span class='op'>=&gt;</span> <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;Segment 3 error&quot;</span>),
+        <span class='ident'>KeyErr</span>::<span class='ident'>UnknownError</span> <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;An unknown error occured&quot;</span>),
+    };
+}
+</pre>
+
+<h1 id="segment-1" class='section-header'><a
+                           href="#segment-1">Segment 1</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>check_segment1</span>(<span class='ident'>key</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>KeyRst</span> {
+
+    <span class='comment'>// get segment 0 of the input key</span>
+    <span class='kw'>let</span> <span class='ident'>keyslice</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>key</span>.<span class='ident'>get</span>(<span class='number'>0</span>) {
+        <span class='prelude-val'>Some</span>(<span class='ident'>k</span>) <span class='op'>=&gt;</span> <span class='ident'>k</span>,
+        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S1Err</span>),
+    };
+
+    <span class='comment'>// convert segment into u64 value</span>
+    <span class='kw'>let</span> <span class='ident'>value</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>u64</span>::<span class='ident'>from_str_radix</span>(<span class='ident'>keyslice</span>, <span class='number'>10</span>) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>,
+        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S1Err</span>),
+    };
+
+    <span class='comment'>// few conditional checks on value</span>
+    <span class='kw'>if</span> <span class='number'>50000</span> <span class='op'>&gt;</span> <span class='ident'>value</span> {
+        <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S1Err</span>);
+    };
+
+    <span class='kw'>if</span> <span class='ident'>value</span> <span class='op'>%</span> <span class='number'>5</span> <span class='op'>!=</span> <span class='number'>0</span> {
+        <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S1Err</span>);
+    };
+
+    <span class='kw'>let</span> <span class='ident'>keyslice</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>keyslice</span>.<span class='ident'>bytes</span>().<span class='ident'>collect</span>(); <span class='comment'>// convert each char into utf-8 bytes,</span>
+    <span class='kw'>let</span> <span class='ident'>modvec</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>2</span>,<span class='number'>8</span>,<span class='op'>-</span><span class='number'>4</span>,<span class='number'>0</span>,<span class='op'>-</span><span class='number'>1</span>];                     <span class='comment'>// create offset vector</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rst</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>5</span>);       <span class='comment'>// create new segment storage</span>
+    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>modvec</span>.<span class='ident'>len</span>() {                          <span class='comment'>// for the size of offset vector</span>
+        <span class='kw'>let</span> <span class='ident'>t</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>keyslice</span>.<span class='ident'>get</span>(<span class='ident'>i</span>) {                 <span class='comment'>// get each value of keyslice bytes</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S1Err</span>),
+        };
+        <span class='ident'>rst</span>.<span class='ident'>push</span>(((<span class='op'>*</span><span class='ident'>t</span> <span class='kw'>as</span> <span class='ident'>i8</span>) <span class='op'>-</span> <span class='ident'>modvec</span>[<span class='ident'>i</span>]) <span class='kw'>as</span> <span class='ident'>u8</span>);                       <span class='comment'>// result[i] = segment[i] - modvec[i]</span>
+    };
+
+    <span class='comment'>// convert rst from Vec&lt;u8&gt; to &amp;str</span>
+    <span class='kw'>let</span> <span class='ident'>rst</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>str</span>::<span class='ident'>from_utf8</span>(<span class='kw-2'>&amp;</span><span class='ident'>rst</span>) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>k</span>) <span class='op'>=&gt;</span> <span class='ident'>k</span>,
+        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S1Err</span>),
+    };
+    <span class='comment'>// clone and mod original key for return</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span> <span class='op'>=</span> <span class='ident'>key</span>.<span class='ident'>clone</span>();
+    <span class='ident'>ret</span>[<span class='number'>0</span>] <span class='op'>=</span> <span class='ident'>rst</span>.<span class='ident'>to_string</span>();
+    <span class='prelude-val'>Ok</span>(<span class='ident'>ret</span>)
+}
+</pre>
+
+<h1 id="segment-2" class='section-header'><a
+                           href="#segment-2">Segment 2</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>check_segment2</span>(<span class='ident'>key</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>modkey</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>KeyRstN</span> {
+
+    <span class='kw'>let</span> <span class='ident'>k1</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>key</span>[<span class='number'>1</span>].<span class='ident'>bytes</span>().<span class='ident'>collect</span>();         <span class='comment'>// collect segment 2 of key as Vec&lt;u8&gt;</span>
+    <span class='kw'>let</span> <span class='ident'>off</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>6u8</span>,<span class='number'>16u8</span>,<span class='number'>95u8</span>,<span class='number'>85u8</span>,<span class='number'>87u8</span>];   <span class='comment'>// create offset Vec&lt;u8&gt;</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rst</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>5</span>);           <span class='comment'>// create storage Vec&lt;u8&gt;</span>
+    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>off</span>.<span class='ident'>len</span>() {                                 <span class='comment'>// for size of offset</span>
+        <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>k1</span>.<span class='ident'>get</span>(<span class='ident'>i</span>) {                           <span class='comment'>// capture value from k1[i]</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>c</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S2Err</span>),
+        };
+        <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>off</span>.<span class='ident'>get</span>(<span class='ident'>i</span>) {                          <span class='comment'>// capture value from off[i]</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>c</span>) <span class='op'>=&gt;</span> <span class='ident'>c</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S2Err</span>),
+        };
+        <span class='ident'>rst</span>.<span class='ident'>push</span>(<span class='ident'>a</span><span class='op'>^</span><span class='ident'>b</span>);                                  <span class='comment'>// rst[i] = k1[i] ^ off[i]</span>
+    };
+
+    <span class='kw'>let</span> <span class='ident'>fin</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>rst</span>) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>k</span>) <span class='op'>=&gt;</span> <span class='ident'>k</span>,
+        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S2Err</span>),
+    };
+    <span class='ident'>modkey</span>[<span class='number'>1</span>] <span class='op'>=</span> <span class='ident'>fin</span>;
+
+    <span class='prelude-val'>Ok</span>(())
+}
+</pre>
+
+<h1 id="segment-3" class='section-header'><a
+                           href="#segment-3">Segment 3</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>check_segment3</span>(<span class='ident'>key</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>, <span class='ident'>modkey</span>:<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>KeyRstN</span> {
+
+    <span class='kw'>let</span> <span class='ident'>mk</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>modkey</span>.<span class='ident'>clone</span>();
+    <span class='kw'>let</span> <span class='ident'>mk0</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>mk</span>.<span class='ident'>get</span>(<span class='number'>0</span>) {
+        <span class='prelude-val'>Some</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S3Err</span>),
+    };
+    <span class='comment'>// get segment 2 of input key</span>
+    <span class='kw'>let</span> <span class='ident'>key2</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>key</span>.<span class='ident'>get</span>(<span class='number'>1</span>) {
+        <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>,
+        <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S3Err</span>),
+    };
+    <span class='kw'>let</span> <span class='ident'>k2b</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>key2</span>.<span class='ident'>bytes</span>().<span class='ident'>collect</span>();      <span class='comment'>// transform to byte vector</span>
+    <span class='kw'>let</span> <span class='ident'>mk0b</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>mk0</span>.<span class='ident'>bytes</span>().<span class='ident'>collect</span>();      <span class='comment'>// transform mod_key[0] to byte vector</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rst</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>i8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>5</span>);   <span class='comment'>// create storage vector</span>
+
+    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>k2b</span>.<span class='ident'>len</span>() {                         <span class='comment'>// for length of segment 2 of input</span>
+        <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>k2b</span>.<span class='ident'>get</span>(<span class='ident'>i</span>) {                  <span class='comment'>// get each char</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='op'>*</span><span class='ident'>v</span> <span class='kw'>as</span> <span class='ident'>i8</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S3Err</span>),
+        };
+        <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>mk0b</span>.<span class='ident'>get</span>(<span class='ident'>i</span>) {                 <span class='comment'>// get each char</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='op'>*</span><span class='ident'>v</span> <span class='kw'>as</span> <span class='ident'>i8</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S3Err</span>),
+        };
+        <span class='ident'>rst</span>.<span class='ident'>push</span>(<span class='ident'>b</span><span class='op'>-</span><span class='ident'>a</span>);                              <span class='comment'>// rst[i] = mk0b[i] - k2b[i]</span>
+    };
+
+    <span class='kw'>let</span> <span class='ident'>off</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>i16</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='macro'>vec</span><span class='macro'>!</span>[<span class='number'>130i16</span>, <span class='number'>95i16</span>, <span class='number'>80i16</span>, <span class='number'>33i16</span>, <span class='number'>29i16</span>];   <span class='comment'>// create offset vector</span>
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>ret</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='number'>5</span>);       <span class='comment'>// create storage vector</span>
+
+    <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>.. <span class='ident'>rst</span>.<span class='ident'>len</span>() {                        <span class='comment'>// for length of rst</span>
+        <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>rst</span>.<span class='ident'>get</span>(<span class='ident'>i</span>) {                  <span class='comment'>// capture rst[i]</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S3Err</span>),
+        };
+        <span class='kw'>let</span> <span class='ident'>b</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>off</span>.<span class='ident'>get</span>(<span class='ident'>i</span>) {                  <span class='comment'>// capture off[i]</span>
+            <span class='prelude-val'>Some</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>,
+            <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S3Err</span>),
+        };
+        <span class='ident'>ret</span>.<span class='ident'>push</span>(((<span class='op'>*</span><span class='ident'>a</span> <span class='kw'>as</span> <span class='ident'>i16</span>)<span class='op'>+</span><span class='ident'>b</span>) <span class='kw'>as</span> <span class='ident'>u8</span>);                        <span class='comment'>// rst[i] = rst[i] + off[i]</span>
+    };
+
+    <span class='kw'>let</span> <span class='ident'>fin</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>ret</span>) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>v</span>) <span class='op'>=&gt;</span> <span class='ident'>v</span>,
+        <span class='prelude-val'>Err</span>(_) <span class='op'>=&gt;</span> <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>KeyErr</span>::<span class='ident'>S3Err</span>),
+    };
+    <span class='ident'>modkey</span>[<span class='number'>2</span>] <span class='op'>=</span> <span class='ident'>fin</span>;
+    <span class='prelude-val'>Ok</span>(())
+}
+</pre>
+
+<h1 id="final-validation" class='section-header'><a
+                           href="#final-validation">Final Validation</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>check_final</span>(<span class='ident'>key</span>: <span class='kw-2'>&amp;</span><span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>String</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>string</span> <span class='op'>=</span> <span class='ident'>String</span>::<span class='ident'>new</span>();
+    <span class='kw'>for</span> <span class='ident'>val</span> <span class='kw'>in</span> <span class='ident'>key</span>.<span class='ident'>iter</span>() {
+        <span class='ident'>string</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;{}{}-&quot;</span>, <span class='ident'>string</span>, <span class='ident'>val</span>);
+    }
+    <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>string</span>.<span class='ident'>len</span>()<span class='op'>-</span><span class='number'>1</span>;
+    <span class='ident'>string</span>.<span class='ident'>truncate</span>(<span class='ident'>len</span>);
+    <span class='kw'>let</span> <span class='ident'>bytes</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>string</span>.<span class='ident'>bytes</span>().<span class='ident'>collect</span>();
+    <span class='kw'>let</span> <span class='ident'>digest</span> <span class='op'>=</span> <span class='ident'>compute</span>(<span class='ident'>bytes</span>.<span class='ident'>as_slice</span>());
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>string</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>u8</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>new</span>();
+    <span class='ident'>string</span>.<span class='ident'>push_all</span>(<span class='kw-2'>&amp;</span><span class='ident'>digest</span>);
+    <span class='kw'>let</span> <span class='ident'>md5</span> <span class='op'>=</span> <span class='kw'>match</span> <span class='ident'>String</span>::<span class='ident'>from_utf8</span>(<span class='ident'>string</span>) {
+        <span class='prelude-val'>Ok</span>(<span class='ident'>s</span>) <span class='op'>=&gt;</span> <span class='ident'>s</span>,
+        <span class='prelude-val'>Err</span>(<span class='ident'>e</span>) <span class='op'>=&gt;</span> {
+            <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>e</span>);
+            <span class='kw'>return</span> <span class='boolval'>false</span>;
+        },
+    };
+    <span class='macro'>println</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>md5</span>);
+    <span class='boolval'>true</span>
+}
+</pre>
+
+<h1 id="questions" class='section-header'><a
+                           href="#questions">Questions</a></h1>
+<p>Spenser Reinhardt</p>
+
+<p>@c0mmiebstrd</p>
+
+    <script type="text/javascript">
+        window.playgroundUrl = "";
+    </script>
+    
+</body>
+</html>
